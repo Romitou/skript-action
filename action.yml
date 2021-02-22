@@ -1,0 +1,5 @@
+name: 'skript-action'
+description: 'Parse and execute your scripts written with Skript in GitHub Actions'
+runs:
+  using: 'node12'
+  main: 'index.js'
