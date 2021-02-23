@@ -17,9 +17,6 @@ const pluginsPath = path.join(runnerPath, 'plugins');
 const skriptPath = path.join(pluginsPath, 'Skript');
 const scriptsPath = path.join(skriptPath, 'scripts')
 
-// Octokit
-const baseOptions =  { headers: { 'content-type': 'application/json' } };
-
 // Action
 let skriptFiles;
 
@@ -39,12 +36,12 @@ async function setupEnvironnement() {
     stepStart('Setup environnement')
 
     const skriptInput = core.getInput('scripts');
-    skriptFiles = await glob.sync(skriptInput || '**/*.sk', {});
+    skriptFiles = await glob.sync(skriptInput || '*/**/*.sk');
     stepComplete('Scripts found', skriptFiles.join(', '));
 
-    if (await fs.existsSync(scriptsPath)) {
-        await fs.rmdirSync(scriptsPath, { recursive: true });
-        stepComplete('Existing scripts purged')
+    if (await fs.existsSync(skriptPath)) {
+        await fs.rmdirSync(skriptPath, { recursive: true });
+        stepComplete('Existing scripts and Skript configurations purged')
     }
 
     await [basePath, tempPath, runnerPath, pluginsPath, skriptPath, scriptsPath]
@@ -71,9 +68,10 @@ async function downloadSkript() {
     const downloadUrl = latestSkriptRelease?.assets[0]?.browser_download_url;
     if (!downloadUrl)
         stepError('Cannot retrieve Skript browser download URL from latest Skript release!');
-    const { data: skriptJar } = await axios.get(downloadUrl);
-    await fs.appendFileSync(skriptJarPath, Buffer.from(skriptJar));
-    stepComplete('Skript downloaded', `Skript v${latestSkriptRelease.tag_name} has been downloaded!`)
+    const writer = fs.createWriteStream(skriptJarPath);
+    const { data: skriptJar } = await axios.get(downloadUrl, { responseType: 'stream' });
+    await skriptJar.pipe(writer);
+    return new Promise(resolve => writer.on('finish', resolve));
 }
 
 async function fetchLatestPaper() {
@@ -97,9 +95,10 @@ async function downloadPaper() {
     stepStart('Download Paper software')
     if (await fs.existsSync(paperJarPath))
         return stepComplete('Download skipped', `Paper ${latestPaperVersion}, build #${latestPaperBuild} was already downloaded!`)
-    const { data: paperJar } = await axios.get(`https://papermc.io/api/v2/projects/paper/versions/${latestPaperVersion}/builds/${latestPaperBuild}/downloads/paper-${latestPaperVersion}-${latestPaperBuild}.jar`)
-    await fs.appendFileSync(paperJarPath, Buffer.from(paperJar));
-    stepComplete('Paper downloaded', `Paper ${latestPaperVersion}, build #${latestPaperBuild} has been downloaded!`)
+    const writer = fs.createWriteStream(paperJarPath);
+    const { data: paperJar } = await axios.get(`https://papermc.io/api/v2/projects/paper/versions/${latestPaperVersion}/builds/${latestPaperBuild}/downloads/paper-${latestPaperVersion}-${latestPaperBuild}.jar`, { responseType: 'stream' })
+    await paperJar.pipe(writer);
+    return new Promise(resolve => writer.on('finish', resolve));
 }
 
 async function setupRunner() {
@@ -149,10 +148,15 @@ async function startRunner() {
 
 async function run() {
     await setupEnvironnement();
+
     await fetchLatestSkript();
     await downloadSkript();
+    stepComplete('Skript downloaded', `Skript v${latestSkriptRelease.tag_name} has been downloaded!`);
+
     await fetchLatestPaper();
-    await downloadPaper()
+    await downloadPaper();
+    stepComplete('Paper downloaded', `Paper ${latestPaperVersion}, build #${latestPaperBuild} has been downloaded!`)
+
     await setupRunner();
     await startRunner();
 }
