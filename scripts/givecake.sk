@@ -1,0 +1,3 @@
+command givecake:
+    trigger:
+        give a cake to player
