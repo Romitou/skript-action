@@ -4,6 +4,7 @@ const chalk = require('chalk');
  * @param stepName Name of the step
  */
 function stepStart(stepName) {
+    console.log();
     console.log(chalk.gray('==>') + ' ' + chalk.whiteBright(stepName));
 }
 
@@ -13,14 +14,13 @@ function stepStart(stepName) {
  */
 function stepComplete(stepName, description) {
     console.log(chalk.greenBright(' ✔ ') + ' ' + chalk.blue(stepName) + (description ? ' ' + chalk.gray(description) : ''));
-    console.log();
 }
 
 /**
  * @param error Error of the step
  */
 function stepError(error) {
-    console.log(chalk.redBright(' ❌ ') + chalk.white(error));
+    console.log(chalk.redBright(' ❌ ') + ' ' + chalk.red(error));
     process.exit(0);
 }
 
