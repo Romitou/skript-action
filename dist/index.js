@@ -72,7 +72,7 @@ async function downloadSkript() {
     stepStart('Download Skript plugin')
     if (await fs.existsSync(skriptJarPath))
         return stepComplete('Download skipped', `Skript v${latestSkriptRelease.tag_name} was already downloaded!`)
-    const downloadUrl = latestSkriptRelease?.assets[0]?.browser_download_url;
+    const downloadUrl = latestSkriptRelease.assets[0].browser_download_url;
     if (!downloadUrl)
         stepError('Cannot retrieve Skript browser download URL from latest Skript release!');
     const writer = fs.createWriteStream(skriptJarPath);
@@ -85,13 +85,13 @@ async function fetchLatestPaper() {
     stepStart('Fetch latest Paper version')
 
     const { data: latestVersions } = await axios.get('https://papermc.io/api/v2/projects/paper', { headers: { 'content-type': 'application/json' } });
-    if (!latestVersions?.versions)
+    if (!latestVersions || !latestVersions.versions)
         stepError('Cannot fetch latest Paper version!')
     latestPaperVersion = latestVersions.versions[latestVersions.versions.length - 1];
     stepComplete('Fetched version', latestPaperVersion)
 
     const { data: latestBuilds } = await axios.get(`https://papermc.io/api/v2/projects/paper/versions/${latestPaperVersion}`, { headers: { 'content-type': 'application/json' } })
-    if (!latestBuilds?.builds)
+    if (!latestBuilds || !latestBuilds.builds)
         stepError(`Cannot fetch latest Paper build for ${latestPaperVersion}!`)
     latestPaperBuild = latestBuilds.builds[latestBuilds.builds.length - 1];
     paperJarPath = path.join(tempPath, `paper-${latestPaperVersion}-${latestPaperBuild}.jar`)
