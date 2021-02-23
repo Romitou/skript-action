@@ -160,3 +160,5 @@ async function run() {
     await setupRunner();
     await startRunner();
 }
+
+(async () => await run())();

@@ -168,6 +168,8 @@ async function run() {
     await startRunner();
 }
 
+(async () => await run())();
+
 
 /***/ }),
 
