@@ -27,8 +27,9 @@
   "dependencies": {
     "@actions/core": "^1.2.5",
     "@actions/exec": "^1.0.4",
-    "@octokit/rest": "^18.2.0",
-    "chalk": "^4.1.0"
+    "axios": "^0.21.1",
+    "chalk": "^4.1.0",
+    "glob": "^7.1.6"
   },
   "devDependencies": {
     "@vercel/ncc": "^0.27.0",
