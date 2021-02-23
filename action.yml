@@ -1,5 +1,8 @@
 name: 'skript-action'
 description: 'Parse and execute your scripts written with Skript in GitHub Actions'
+branding:
+    icon: box
+    color: yellow
 runs:
   using: 'node12'
   main: 'index.js'
